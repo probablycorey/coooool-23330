@@ -1,0 +1,109 @@
+html, body {
+  margin: 0;
+  padding: 0;
+}
+
+canvas {
+  display: block;
+}
+
+●▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬ Yᵒᵘ Oᶰˡʸ Lᶤᵛᵉ Oᶰᶜᵉ ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬●
+
+<!doctype html>
+
+<html>
+<head>
+  <meta charset="utf-8">
+</head>
+
+<body>
+  <canvas width='300' height='300' />
+</body>
+</html>
+
+●▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬ Yᵒᵘ Oᶰˡʸ Lᶤᵛᵉ Oᶰᶜᵉ ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬●
+
+const canvas = document.querySelector('canvas')
+const ctx = canvas.getContext('2d')
+
+let velocity = { x: 0, y: 0 }
+let player = { x: 15, y: 15, tail: [], tailLength: 0 }
+let food = { x: 10, y: 10 }
+let gridSize = 15
+let tileCount = 20
+
+const keydown = (event) => {
+  if (event.key === 'ArrowLeft') {
+    velocity.x = -1
+    velocity.y = 0
+  } else if (event.key === 'ArrowUp') {
+    velocity.x = 0
+    velocity.y = -1
+  } else if (event.key === 'ArrowRight') {
+    velocity.x = 1
+    velocity.y = 0
+  } else if (event.key === 'ArrowDown') {
+    velocity.x = 0
+    velocity.y = 1
+  }
+}
+  
+const loop = () => {
+  ctx.fillStyle = 'black'
+  ctx.fillRect(0, 0, canvas.width, canvas.height)
+
+  player.x += velocity.x
+  player.y += velocity.y
+
+  if (player.x < 0 || player.x > tileCount) {
+    die()
+  }
+
+  if (player.y < 0 || player.y > tileCount) {
+    die()
+  }
+
+  ctx.fillStyle = 'tomato'
+  draw(food)
+
+  ctx.fillStyle = 'green'
+  draw(player)
+  player.tail.forEach(segment => {
+    draw(segment)
+    if (segment.x === player.x && segment.y === player.y) {
+      die()
+    }
+  })
+
+  player.tail.push(Object.assign({}, player))
+  while (player.tail.length > player.tailLength) {
+    player.tail.shift()
+  }
+
+  if (food.x === player.x && food.y === player.y) {
+    food.x = Math.floor(Math.random() * tileCount)
+    food.y = Math.floor(Math.random() * tileCount)
+    player.tailLength++
+  } 
+}
+
+const die = () => {
+  player.x = 15
+  player.y = 15
+  player.tailLength = 0
+  player.tail = []
+
+  ctx.fillStyle = 'red'
+  ctx.fillRect(0, 0, canvas.width, canvas.height)
+}
+
+const draw = (segment) => {
+  const x = segment.x * gridSize
+  const y = segment.y * gridSize
+  const width = gridSize - 2
+  const height = gridSize - 2
+  ctx.fillRect(x, y, width, height)
+}
+
+document.addEventListener('keydown', keydown)
+setInterval(loop, 1000 / 15)
